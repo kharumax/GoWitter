@@ -11,11 +11,16 @@ func SetUpTemplate(t *template.Template)  {
 	tpl = t
 }
 
+func TopHandler(w http.ResponseWriter,r *http.Request)  {
+	tpl.ExecuteTemplate(w,"index.html","")
+}
+
 func BaseHandler(w http.ResponseWriter,r *http.Request)  {
 	// ここでURLのパラメータ解析をして、それぞれのハンドラに振る
 	url := r.URL.Path
 	switch {
 	case url == "/" && r.Method == http.MethodGet:
+		TopHandler(w,r)
 		//トップページへの繊維を行う
 	case url == "/users/":
 		//ユーザー機能

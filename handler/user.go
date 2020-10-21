@@ -2,13 +2,19 @@ package handler
 
 import (
 	"GoWitter/model"
-	"fmt"
+	"database/sql"
 	"net/http"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type SignUpError struct {
+	ErrorMessage string
+}
+type LoginError struct {
+	Email string
+	Password string
 	ErrorMessage string
 }
 
@@ -43,8 +49,8 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 			return
 		}
 		//ここで送られてきたemailが既に登録されているかを確認する
-		checkUserExist := model.CheckUserExist(email)
-		if checkUserExist {
+		isUserExist := model.IsUserExist(email)
+		if !isUserExist {
 			errorMsg.ErrorMessage = "そのメールアドレスは既に利用されています。"
 			tpl.ExecuteTemplate(w,"signup.html",errorMsg)
 			return
@@ -54,10 +60,72 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 		if err != nil {
 			errorMsg.ErrorMessage = "ネットワークの障害が発生しました。"
 			tpl.ExecuteTemplate(w,"signup.html",errorMsg)
+			return
 		}
-		password_digest := string(hash)
-		//hashFromStr := []byte(string(hash))
-		//err := bcrypt.CompareHashAndPassword(hashFromStr,[]byte(password))
-		//fmt.Println("This is compare : ",err)
+		passwordDigest := string(hash)
+		_,insertError := model.CreateUser(email,passwordDigest)
+		if insertError != nil {
+			errorMsg.ErrorMessage = insertError.Error()
+			tpl.ExecuteTemplate(w,"signup.html",errorMsg)
+			return
+		}
+		http.Redirect(w,r,"/",http.StatusFound)
+		return
 	}
+	errorMsg.ErrorMessage = "無効なHTTPリクエストです。"
+	tpl.ExecuteTemplate(w,"signup.html",errorMsg)
+	return
 }
+
+func LoginHandler(w http.ResponseWriter,r *http.Request)  {
+	if r.Method == http.MethodGet {
+		tpl.ExecuteTemplate(w,"login.html","")
+		return
+	}
+	errorMsg := LoginError{}
+	if r.Method == http.MethodPost {
+		//ここにPOSTリクエストの場合の処理を記述する
+		email := r.PostFormValue("email")
+		password := r.PostFormValue("password")
+		user,getUserError := model.GetUser(email)
+		if getUserError != nil && getUserError == sql.ErrNoRows {
+			errorMsg.ErrorMessage = "指定されたユーザーは存在しません。"
+			tpl.ExecuteTemplate(w,"login.html",errorMsg)
+			return
+		}
+		if getUserError != nil && getUserError != sql.ErrNoRows {
+			errorMsg.ErrorMessage = getUserError.Error()
+			tpl.ExecuteTemplate(w,"login.html",errorMsg)
+			return
+		}
+		//ここでパスワードの確認を行う
+		passwordFromHash := []byte(user.Password)
+		err := bcrypt.CompareHashAndPassword(passwordFromHash,[]byte(password))
+		if err != nil {
+			errorMsg.ErrorMessage = "emailかパスワードが間違っています。"
+			tpl.ExecuteTemplate(w,"login.html",errorMsg)
+			return
+		}
+		//パスワードが一致した場合の処理をここで記述する
+		//ここでは、取得したユーザーのIDを暗号化して、それをCookieに保持させる
+		strId := strconv.Itoa(user.Id)
+		sessionHash,hashError := bcrypt.GenerateFromPassword([]byte(strId),bcrypt.DefaultCost)
+		if hashError != nil {
+			errorMsg.ErrorMessage = hashError.Error()
+			tpl.ExecuteTemplate(w,"login.html",errorMsg)
+			return
+		}
+		// Hash => string ex(12 34 01 ... => meqineqo...)
+		sessionId := string(sessionHash)
+		// Cookieにセッション情報を格納
+		http.SetCookie(w,&http.Cookie{
+			Name:       "sessionId",
+			Value:      sessionId,
+		})
+		http.Redirect(w,r,"/",http.StatusFound)
+	}
+	errorMsg.ErrorMessage = "無効なHTTPリクエストです。"
+	tpl.ExecuteTemplate(w,"login.html",errorMsg)
+	return
+}
+
