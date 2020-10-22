@@ -5,6 +5,15 @@
     <title>Title</title>
 </head>
 <body>
-
+    <div>
+        <h2>{{.ErrorMessage}}</h2>
+        <form action="/login" method="post">
+            <input type="email" name="email" placeholder="email...">
+            <br>
+            <input type="password" name="password" placeholder="password...">
+            <br>
+            <input type="submit" value="ログイン">
+        </form>
+    </div>
 </body>
 </html>

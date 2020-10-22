@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"GoWitter/model"
 	"html/template"
 	"net/http"
 )
@@ -12,7 +13,16 @@ func SetUpTemplate(t *template.Template)  {
 }
 
 func TopHandler(w http.ResponseWriter,r *http.Request)  {
-	tpl.ExecuteTemplate(w,"index.html","")
+	user,isLogin,err := model.GetCurrentUser(r)
+	if err != nil {
+		tpl.ExecuteTemplate(w,"index.html",user)
+		return
+	}
+	if isLogin {
+		tpl.ExecuteTemplate(w,"index.html",user)
+		return
+	}
+	tpl.ExecuteTemplate(w,"index.html",user)
 }
 
 func BaseHandler(w http.ResponseWriter,r *http.Request)  {
@@ -29,7 +39,8 @@ func BaseHandler(w http.ResponseWriter,r *http.Request)  {
 	case url == "/signup/" || url == "/signup":
 		//signupの処理に呼ぶ
 		SignUpHandler(w,r)
-	case url == "/login":
+	case url == "/login" || url == "/login/":
+		LoginHandler(w,r)
 		//loginの処理を呼ぶ
 	case url == "/logout" && r.Method == http.MethodPost:
 		//ログアウトの処理

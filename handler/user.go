@@ -3,11 +3,12 @@ package handler
 import (
 	"GoWitter/model"
 	"database/sql"
+	"encoding/base64"
 	"net/http"
-	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
 
 type SignUpError struct {
 	ErrorMessage string
@@ -78,11 +79,11 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 }
 
 func LoginHandler(w http.ResponseWriter,r *http.Request)  {
+	errorMsg := LoginError{}
 	if r.Method == http.MethodGet {
-		tpl.ExecuteTemplate(w,"login.html","")
+		tpl.ExecuteTemplate(w,"login.html",errorMsg)
 		return
 	}
-	errorMsg := LoginError{}
 	if r.Method == http.MethodPost {
 		//ここにPOSTリクエストの場合の処理を記述する
 		email := r.PostFormValue("email")
@@ -94,7 +95,6 @@ func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 			return
 		}
 		if getUserError != nil && getUserError != sql.ErrNoRows {
-			errorMsg.ErrorMessage = getUserError.Error()
 			tpl.ExecuteTemplate(w,"login.html",errorMsg)
 			return
 		}
@@ -108,19 +108,11 @@ func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 		}
 		//パスワードが一致した場合の処理をここで記述する
 		//ここでは、取得したユーザーのIDを暗号化して、それをCookieに保持させる
-		strId := strconv.Itoa(user.Id)
-		sessionHash,hashError := bcrypt.GenerateFromPassword([]byte(strId),bcrypt.DefaultCost)
-		if hashError != nil {
-			errorMsg.ErrorMessage = hashError.Error()
-			tpl.ExecuteTemplate(w,"login.html",errorMsg)
-			return
-		}
-		// Hash => string ex(12 34 01 ... => meqineqo...)
-		sessionId := string(sessionHash)
+		sessionEncode := base64.RawStdEncoding.EncodeToString([]byte(user.Email))
 		// Cookieにセッション情報を格納
 		http.SetCookie(w,&http.Cookie{
 			Name:       "sessionId",
-			Value:      sessionId,
+			Value:      sessionEncode,
 		})
 		http.Redirect(w,r,"/",http.StatusFound)
 	}
@@ -128,4 +120,5 @@ func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 	tpl.ExecuteTemplate(w,"login.html",errorMsg)
 	return
 }
+
 
