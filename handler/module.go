@@ -7,6 +7,8 @@ import (
 	"errors"
 )
 
+// TODO("なんでModuleで分けてる?")
+
 // URLから「id」を取得する
 func getUserIdFromURL(r *http.Request) (int,error)  {
 	url := r.URL.Path

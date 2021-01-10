@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 type SignUpError struct {
 	ErrorMessage string
 }
@@ -51,7 +50,8 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 		}
 		//ここで送られてきたemailが既に登録されているかを確認する
 		isUserExist := model.IsUserExist(email)
-		if !isUserExist {
+		if isUserExist {
+			// 既にそのメアドがDBに保存されていた場合
 			errorMsg.ErrorMessage = "そのメールアドレスは既に利用されています。"
 			tpl.ExecuteTemplate(w,"signup.html",errorMsg)
 			return
@@ -77,6 +77,7 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 	tpl.ExecuteTemplate(w,"signup.html",errorMsg)
 	return
 }
+
 
 func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 	errorMsg := LoginError{}
