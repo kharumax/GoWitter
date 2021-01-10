@@ -47,6 +47,17 @@ func GetUser(email string) (User,error)  {
 	return user,nil
 }
 
+func GetUserById(id int) (User,error)  {
+	user := User{}
+	err := db.QueryRow("SELECT * FROM users WHERE id = ?",id).
+		Scan(&user.Id,&user.Email,&user.Name,&user.ProfileImage,&user.Description,&user.Password)
+	if err != nil {
+		log.Fatal(err.Error())
+		return user,err
+	}
+	return user,nil
+}
+
 func GetCurrentUser(r *http.Request) (User,bool,error)  {
 	//ここでセッションからEmailを取得する
 	user := User{}

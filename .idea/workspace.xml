@@ -2,14 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9f2593da-ad51-4997-9582-9ff7c477e330" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/handler/module.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/handler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handler/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/user.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp/runner-build" beforeDir="false" afterPath="$PROJECT_DIR$/tmp/runner-build" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,9 +17,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Go File" />
         <option value="HTML File" />
         <option value="CSS File" />
+        <option value="Go File" />
       </list>
     </option>
   </component>
@@ -77,10 +75,10 @@
       <screen x="-233" y="-1080" width="1920" height="1080" />
     </state>
     <state x="465" y="-786" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1440.900/-233.-1080.1920.1080@-233.-1080.1920.1080" timestamp="1603284633832" />
-    <state x="469" y="201" width="670" height="564" key="search.everywhere.popup" timestamp="1603327277811">
-      <screen x="0" y="0" width="1440" height="900" />
+    <state x="392" y="-839" width="670" height="676" key="search.everywhere.popup" timestamp="1603857762459">
+      <screen x="-233" y="-1080" width="1920" height="1080" />
     </state>
-    <state x="392" y="-839" width="670" height="676" key="search.everywhere.popup/0.0.1440.900/-233.-1080.1920.1080@-233.-1080.1920.1080" timestamp="1603268492130" />
+    <state x="392" y="-839" width="670" height="676" key="search.everywhere.popup/0.0.1440.900/-233.-1080.1920.1080@-233.-1080.1920.1080" timestamp="1603857762459" />
     <state x="469" y="201" width="670" height="564" key="search.everywhere.popup/0.0.1440.900/-233.-1080.1920.1080@0.0.1440.900" timestamp="1603327277811" />
   </component>
 </project>

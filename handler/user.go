@@ -121,4 +121,17 @@ func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 	return
 }
 
+func UserShowHandler(w http.ResponseWriter,r *http.Request)  {
+	//　ここでユーザーページを取得する
+	id,err := getUserIdFromURL(r)
+	if err != nil {
+		//ここで404 NotFound呼ぶ
+	}
+	user,getUserError := model.GetUserById(id)
+	if getUserError != nil {
+		//　ここで404 NotFound
+	}
+	tpl.ExecuteTemplate(w,"users_show.html",user)
+}
+
 

@@ -4,6 +4,7 @@ import (
 	"GoWitter/model"
 	"html/template"
 	"net/http"
+	"strings"
 )
 
 var tpl *template.Template
@@ -27,19 +28,23 @@ func TopHandler(w http.ResponseWriter,r *http.Request)  {
 
 func BaseHandler(w http.ResponseWriter,r *http.Request)  {
 	// ここでURLのパラメータ解析をして、それぞれのハンドラに振る
+	// ここでは、URLの末尾に「/」が含まれている場合は、それを削除する
+	if strings.HasSuffix(r.URL.Path,"/") {
+		r.URL.Path = r.URL.Path[:len(r.URL.Path)-1]
+	}
 	url := r.URL.Path
 	switch {
-	case url == "/" && r.Method == http.MethodGet:
+	case url == "" && r.Method == http.MethodGet:
 		TopHandler(w,r)
 		//トップページへの繊維を行う
-	case url == "/users/":
+	case strings.Contains(url,"users"):
 		//ユーザー機能
-	case url == "/posts/":
+	case strings.Contains(url,"posts"):
 		//投稿機能＋いいね＋コメント
-	case url == "/signup/" || url == "/signup":
+	case url == "/signup":
 		//signupの処理に呼ぶ
 		SignUpHandler(w,r)
-	case url == "/login" || url == "/login/":
+	case url == "/login":
 		LoginHandler(w,r)
 		//loginの処理を呼ぶ
 	case url == "/logout" && r.Method == http.MethodPost:
