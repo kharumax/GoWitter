@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"GoWitter/model"
 	"html/template"
 	"net/http"
 	"strings"
@@ -14,13 +13,9 @@ func SetUpTemplate(t *template.Template)  {
 }
 
 func TopHandler(w http.ResponseWriter,r *http.Request)  {
-	user,isLogin,err := model.GetCurrentUser(r)
+	user,err := getCurrentUser(r)
 	if err != nil {
-		tpl.ExecuteTemplate(w,"index.html",user)
-		return
-	}
-	if isLogin {
-		tpl.ExecuteTemplate(w,"index.html",user)
+		tpl.ExecuteTemplate(w,"index.html",nil)
 		return
 	}
 	tpl.ExecuteTemplate(w,"index.html",user)

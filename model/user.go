@@ -2,9 +2,7 @@ package model
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"log"
-	"net/http"
 )
 
 func IsUserExist(email string) bool  {
@@ -58,23 +56,3 @@ func GetUserById(id int) (User,error)  {
 	return user,nil
 }
 
-func GetCurrentUser(r *http.Request) (User,bool,error)  {
-	//ここでセッションからEmailを取得する
-	user := User{}
-	sessionId,cookieError := r.Cookie("sessionId")
-	if cookieError != nil {
-		return user,false,cookieError
-	}
-	// []byte()
-	sessionDecode,err :=  base64.RawStdEncoding.DecodeString(sessionId.Value)
-	if err != nil {
-		return user,false,err
-	}
-	// email = string(sessionDecode)
-	user,getUserError := GetUser(string(sessionDecode))
-	if getUserError != nil {
-		return user,false,getUserError
-	}
-	return user,true,nil
-
-}

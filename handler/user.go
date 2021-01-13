@@ -3,7 +3,6 @@ package handler
 import (
 	"GoWitter/model"
 	"database/sql"
-	"encoding/base64"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -20,6 +19,14 @@ type LoginError struct {
 
 func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 	errorMsg := SignUpError{}
+	// 既にログインしているかどうかを判断する関数を作る
+	_,err := getCurrentUser(r)
+	if err == nil {
+		// 既にログインしている場合は、一旦indexに飛ばす
+		http.Redirect(w,r,"/",http.StatusFound)
+		return
+	}
+
 	if r.Method == http.MethodGet {
 		//サインページを出力する
 		errorMsg.ErrorMessage = ""
@@ -64,12 +71,13 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 			return
 		}
 		passwordDigest := string(hash)
-		_,insertError := model.CreateUser(email,passwordDigest)
+		user,insertError := model.CreateUser(email,passwordDigest)
 		if insertError != nil {
 			errorMsg.ErrorMessage = insertError.Error()
 			tpl.ExecuteTemplate(w,"signup.html",errorMsg)
 			return
 		}
+		setSessionToCookie(w,user.Id)
 		http.Redirect(w,r,"/",http.StatusFound)
 		return
 	}
@@ -81,6 +89,13 @@ func SignUpHandler(w http.ResponseWriter,r *http.Request)  {
 
 func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 	errorMsg := LoginError{}
+	// 既にログインしているかどうかを判断する関数を作る
+	_,err := getCurrentUser(r)
+	if err == nil {
+		// 既にログインしている場合は、一旦indexに飛ばす
+		http.Redirect(w,r,"/",http.StatusFound)
+		return
+	}
 	if r.Method == http.MethodGet {
 		tpl.ExecuteTemplate(w,"login.html",errorMsg)
 		return
@@ -96,6 +111,7 @@ func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 			return
 		}
 		if getUserError != nil && getUserError != sql.ErrNoRows {
+			errorMsg.ErrorMessage = getUserError.Error()
 			tpl.ExecuteTemplate(w,"login.html",errorMsg)
 			return
 		}
@@ -107,19 +123,28 @@ func LoginHandler(w http.ResponseWriter,r *http.Request)  {
 			tpl.ExecuteTemplate(w,"login.html",errorMsg)
 			return
 		}
-		//パスワードが一致した場合の処理をここで記述する
-		//ここでは、取得したユーザーのIDを暗号化して、それをCookieに保持させる
-		sessionEncode := base64.RawStdEncoding.EncodeToString([]byte(user.Email))
-		// Cookieにセッション情報を格納
-		http.SetCookie(w,&http.Cookie{
-			Name:       "sessionId",
-			Value:      sessionEncode,
-		})
+		// ユーザーIDをEncodeしてCookieに保存する処理
+		setSessionToCookie(w,user.Id)
 		http.Redirect(w,r,"/",http.StatusFound)
+		return
 	}
 	errorMsg.ErrorMessage = "無効なHTTPリクエストです。"
 	tpl.ExecuteTemplate(w,"login.html",errorMsg)
 	return
+}
+
+func LogoutHandler(w http.ResponseWriter,r *http.Request) {
+	if r.Method == http.MethodPost {
+		_,err := getCurrentUser(r)
+		if err != nil {
+			return
+		}
+		err = deleteSessionFromCookie(w,r)
+		if err != nil {
+			return
+		}
+		http.Redirect(w,r,"/",http.StatusFound)
+	}
 }
 
 func UserShowHandler(w http.ResponseWriter,r *http.Request)  {
